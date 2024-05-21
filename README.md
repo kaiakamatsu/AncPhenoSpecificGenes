@@ -12,6 +12,7 @@ R packages
 - ggplot2
 - fBasics
 - MASS
+- biomaRt
 
 ## Data Processing
 
