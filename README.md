@@ -43,4 +43,6 @@ I regress out several confounders/covariates from the gene expression data befor
 
 > Cluster based on TWAS results: http://twas-hub.org/traits/
 
-> Cluster based on differential expression analysis results: https://www.nature.com/articles/s41598-019-43881-5 (see table 2)
+> Cluster based on differential expression analysis results:
+- https://www.nature.com/articles/s41598-019-43881-5 (see table 2)
+- https://www.nature.com/articles/s41366-022-01240-x#Sec8 (supplmental table 2)
