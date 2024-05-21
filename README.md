@@ -35,7 +35,7 @@ I regress out several confounders/covariates from the gene expression data befor
 
 ## Analysis
 
-### Which genes are differentially expressed in individuals with differnet BMI in different ancestry groups?
+### Which genes are differentially expressed in individuals with differenet BMI in different ancestry groups?
 
 > Redundancy analysis
 
