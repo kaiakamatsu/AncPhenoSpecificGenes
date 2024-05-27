@@ -31,13 +31,24 @@ I regress out several confounders/covariates from the gene expression data befor
 ### DATA TRANSFORMATION
 
 - Gene Expression data: inverse normal transformed
-- BMI data: boxcox transformed (lambda = -0.5858586)
+- BMI data: boxcox transformed (lambda = -0.5858586), Z-transformed before RDA analysis
 
 ## Analysis
 
-### Which genes are differentially expressed in individuals with differenet BMI in different ancestry groups?
+### Which genes are differentially expressed in individuals with differenet BMI? Which genes are differentially expressed in different BMI groups of different ancestries? 
 
 > Redundancy analysis
+
+### What are the functions of these genes? 
+
+### Interesting Findings 
+
+1. ENSG00000135842, NIBAN
+
+> https://pubmed.ncbi.nlm.nih.gov/33185830/
+> regulates adipocyte apoptosis, important in obesity development
+
+
 
 ### Comparison to previous association studies
 
