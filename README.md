@@ -45,8 +45,7 @@ I regress out several confounders/covariates from the gene expression data befor
 
 1. ENSG00000135842, NIBAN
 
-> https://pubmed.ncbi.nlm.nih.gov/33185830/
-> regulates adipocyte apoptosis, important in obesity development
+> regulates adipocyte apoptosis, important in obesity development (https://pubmed.ncbi.nlm.nih.gov/33185830/)
 
 
 
