@@ -35,24 +35,27 @@ I regress out several confounders/covariates from the gene expression data befor
 
 ## Analysis
 
-### Which genes are differentially expressed in individuals with differenet BMI? Which genes are differentially expressed in different BMI groups of different ancestries? 
+### BMI vs ancestry
+
+> ANOVA
+
+### Which genes are differentially expressed in individuals with differenet BMI? Which genes are differentially expressed in different BMI groups of different ancestries?
 
 > Redundancy analysis
 
-### What are the functions of these genes? 
+### What are the functions of these genes?
 
-### Interesting Findings 
+### Interesting Findings
 
 1. ENSG00000135842, NIBAN
 
 > regulates adipocyte apoptosis, important in obesity development (https://pubmed.ncbi.nlm.nih.gov/33185830/)
-
-
 
 ### Comparison to previous association studies
 
 > Cluster based on TWAS results: http://twas-hub.org/traits/
 
 > Cluster based on differential expression analysis results:
+
 - https://www.nature.com/articles/s41598-019-43881-5 (see table 2)
 - https://www.nature.com/articles/s41366-022-01240-x#Sec8 (supplmental table 2)

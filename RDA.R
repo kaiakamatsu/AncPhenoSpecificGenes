@@ -137,13 +137,23 @@ bmi_anc_rda <- rda(formula = ge_residuals ~ ancestry*bmi)
 # constrained proportion: 0.01368
 # uncinstrained proportion: 0.9863
 
+# --- anova test against null model 
+null_rda <- rda(formula = ge_residuals ~ 1)
+test <- anova.cca(null_rda, bmi_anc_rda)
+# 999 permutations
+#Model 1: ge_residuals ~ 1
+#Model 2: ge_residuals ~ ancestry * bmi
+#   ResDf ResChiSquare Df ChiSquare     F Pr(>F)    
+#1  1110        22475                               
+#2  1105        22168  5    307.37 3.0644  0.001
+
 # --- plot RDA results 
-png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_vegan_scale1.png")
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_vegan_scale1.png", width = 800, height = 800)
 ordiplot(bmi_anc_rda, scaling = 1, type = "points")
 dev.off()
 # interpretation is difficult, constrained variance is very small so we are only looking at 1.3% of the total variance in this plot
 
-png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_vegan_scale2.png")
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_vegan_scale2.png", width = 800, height = 800)
 ordiplot(bmi_anc_rda, scaling = 2, type = "points")
 dev.off()
   # black dots = people (rows)
@@ -156,7 +166,7 @@ sc_gene <- scores(bmi_anc_rda, display="species", choices=c(1,2), scaling=1)
 sc_bp <- scores(bmi_anc_rda, display="bp", choices=c(1, 2), scaling=1)
   # AA gone??? AA used as reference 
 
-png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1.png")
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1.png", width = 800, height = 800)
 plot(bmi_anc_rda,
      scaling = 1,
      type = "none",
@@ -164,7 +174,9 @@ plot(bmi_anc_rda,
      xlim = c(-3,3), 
      ylim = c(-3,3),
      xlab = paste0("RDA1 (", perc[1], "%)"), 
-     ylab = paste0("RDA2 (", perc[2], "%)") 
+     ylab = paste0("RDA2 (", perc[2], "%)"), 
+     cex.lab = 1.5,
+     cex.axis = 1.2
 )
 color_ind <- rgb(70/255, 130/255, 180/255, alpha = 0.5)  # steelblue with alpha
 color_gene <- rgb(242/255, 189/255, 51/255, alpha = 0.5)
@@ -182,29 +194,29 @@ arrows(0,0, # start them from (0,0)
        sc_bp[,1]*40, sc_bp[,2]*40, # scale up the score values
        col = "red", 
        lwd = 1)
-text(x = sc_bp[c(4,5),1]*40 + 1,
+text(x = sc_bp[c(4,5),1]*40 + 0.7,
      y = sc_bp[c(4,5),2]*40, 
      labels = rownames(sc_bp)[c(4,5)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 text(x = sc_bp[c(3),1]*40,
      y = sc_bp[c(3),2]*40 - 0.2, 
      labels = rownames(sc_bp)[c(3)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 text(x = sc_bp[c(1),1]*40 + 0.2,
      y = sc_bp[c(1),2]*40 + 0.2, 
      labels = rownames(sc_bp)[c(1)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 text(x = sc_bp[c(2),1]*40 + 0.5,
      y = sc_bp[c(2),2]*40 - 0.25, 
      labels = rownames(sc_bp)[c(2)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 legend("bottomright", legend = c("Individual", "Gene"), 
        pch = c(21, 22), pt.bg = c(color_ind, color_gene), col = "black")
@@ -229,7 +241,7 @@ pc_scores %>%
 
 # --- converting common gene names to ENSG
 mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
-genes_list = rownames(pc_scores)
+genes_list = rownames(sc_gene)
 G_list <- getBM(filters= "ensembl_gene_id", attributes= c("ensembl_gene_id","hgnc_symbol"),values=genes_list,mart= mart)
 genes <- data.frame(genes_list)
 colnames(genes) <- c("ensembl_gene_id")
@@ -238,8 +250,8 @@ genes_table <- merge(genes, G_list, by = "ensembl_gene_id", all = TRUE)
 
 # --- previously found differential expressed genes for BMI 
 de <- fread("C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/mesa_de.csv")
-de_ensembl <- filter(genes_table, hgnc_symbol %in% de)
-  # two of these genes were not found in gene table
+de <- filter(de, bacon_p < 1.97*10**-6) # threshold set by paper
+de_ensembl <- filter(genes_table, hgnc_symbol %in% de$MarkerName)
 pc_scores$de <- rep("NO", nrow(pc_scores))
 pc_scores$de[which(rownames(pc_scores) %in% de_ensembl$ensembl_gene_id)] <- "YES"
 
@@ -281,7 +293,7 @@ pc_scores %>%
 ggsave(filename = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/PC_twas.png", width = 5, height = 5)
 
 # --- custom RDA plot again, but with overlay of ge and twas genes
-png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1_de_twas.png")
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1_de_twas.png", width = 850, height = 800)
 plot(bmi_anc_rda,
      scaling = 1,
      type = "none",
@@ -289,7 +301,9 @@ plot(bmi_anc_rda,
      xlim = c(-3,3), 
      ylim = c(-3,3),
      xlab = paste0("RDA1 (", perc[1], "%)"), 
-     ylab = paste0("RDA2 (", perc[2], "%)") 
+     ylab = paste0("RDA2 (", perc[2], "%)"), 
+     cex.lab = 1.5,
+     cex.axis = 1.2
 )
 color_ind <- rgb(70/255, 130/255, 180/255, alpha = 0.5)  # steelblue with alpha
 color_gene <- rgb(242/255, 189/255, 51/255, alpha = 0.5)
@@ -321,39 +335,291 @@ arrows(0,0, # start them from (0,0)
        sc_bp[,1]*40, sc_bp[,2]*40, # scale up the score values
        col = "red", 
        lwd = 1)
-text(x = sc_bp[c(4,5),1]*40 + 1,
+text(x = sc_bp[c(4,5),1]*40 + 0.7,
      y = sc_bp[c(4,5),2]*40, 
      labels = rownames(sc_bp)[c(4,5)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 text(x = sc_bp[c(3),1]*40,
      y = sc_bp[c(3),2]*40 - 0.2, 
      labels = rownames(sc_bp)[c(3)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 text(x = sc_bp[c(1),1]*40 + 0.2,
      y = sc_bp[c(1),2]*40 + 0.2, 
      labels = rownames(sc_bp)[c(1)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 text(x = sc_bp[c(2),1]*40 + 0.5,
      y = sc_bp[c(2),2]*40 - 0.25, 
      labels = rownames(sc_bp)[c(2)], 
      col = "red", 
-     cex = 1, 
+     cex = 1.2, 
      font = 2)
 legend("bottomright", legend = c("Individual", "Genes", "Known DEG", "Known TWAS"), 
        pch = c(21, 22, 23, 24), pt.bg = c(color_ind, color_gene, color_de, color_twas), col = "black")
 dev.off()
 
+# --- custom RDA triplot with de genes overlay, no twas
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1_de.png", width = 800, height = 800)
+plot(bmi_anc_rda,
+     scaling = 1,
+     type = "none",
+     frame = FALSE,
+     xlim = c(-3,3), 
+     ylim = c(-3,3),
+     xlab = paste0("RDA1 (", perc[1], "%)"), 
+     ylab = paste0("RDA2 (", perc[2], "%)"), 
+     cex.lab = 1.5,
+     cex.axis = 1.2
+)
+color_ind <- rgb(70/255, 130/255, 180/255, alpha = 0.5)
+color_gene <- rgb(242/255, 189/255, 51/255, alpha = 0.5)
+color_de <- "red"
+points(sc_ind, 
+       pch = 21,
+       col = "white",
+       bg = color_ind,
+       cex = 1)
+w_de <- which(rownames(sc_gene) %in% de_ensembl$ensembl_gene_id)
+w_twas <- which(rownames(sc_gene) %in% genes_sig)
+points(sc_gene[-c(w_de),], 
+       pch = 22,
+       col = "white",
+       bg = color_gene, 
+       cex = 1)
+points(sc_gene[c(w_de),], 
+       pch = 24,
+       col = "white",
+       bg = color_de, 
+       cex = 1.5)
+arrows(0,0, # start them from (0,0)
+       sc_bp[,1]*40, sc_bp[,2]*40, # scale up the score values
+       col = "red", 
+       lwd = 1)
+text(x = sc_bp[c(4,5),1]*40 + 0.7,
+     y = sc_bp[c(4,5),2]*40, 
+     labels = rownames(sc_bp)[c(4,5)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(3),1]*40,
+     y = sc_bp[c(3),2]*40 - 0.2, 
+     labels = rownames(sc_bp)[c(3)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(1),1]*40 + 0.2,
+     y = sc_bp[c(1),2]*40 + 0.2, 
+     labels = rownames(sc_bp)[c(1)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(2),1]*40 + 0.5,
+     y = sc_bp[c(2),2]*40 - 0.25, 
+     labels = rownames(sc_bp)[c(2)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+legend("bottomright", legend = c("Individual", "Genes", "Known DEG"), 
+       pch = c(21, 22, 23, 24), pt.bg = c(color_ind, color_gene, color_de), col = "black")
+dev.off()
+
+
+# --- loadings = where the new RDA axis lie with respect to the original axis 
+gene_scores <- bmi_anc_rda$CCA$v
+axis_loadings <- bmi_anc_rda$CCA$biplot
+
+# --- can we quantify the gene's scores on each of the original axis? 
+# gene_score_axis1 = gene_score_RDA1 * axis1_loading_RDA1 + gene_score_RDA2 * axis1_loading_RDA2
+# (genes x RDA) %*% (RDA x axis)
+
+axis_loadings_t <- t(axis_loadings)
+gene_scores_axis <- gene_scores %*% axis_loadings_t
+
+# --- order based on these gene axis score
+
+gene_scores_axis_sorted_bmi <- gene_scores_axis[order(abs(gene_scores_axis[, "bmi"]), decreasing = TRUE), ] # sort based on absolute value of gene bmi score
+genes <- rownames(gene_scores_axis_sorted_bmi)
+gene_scores_axis_sorted_bmi_df <- as.data.frame(gene_scores_axis_sorted_bmi)
+gene_scores_axis_sorted_bmi_df <- cbind(genes, gene_scores_axis_sorted_bmi_df)
+rownames(gene_scores_axis_sorted_bmi_df) <- NULL
+write.table(gene_scores_axis_sorted_bmi_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_bmi_sorted_genes.txt", quote = F, row.names = F, col.names = T, sep = '\t')
+
+gene_scores_axis_sorted_CAUbmi_df <- gene_scores_axis_sorted_bmi_df[order(abs(gene_scores_axis_sorted_bmi_df[, "ancestryCAU:bmi"]), decreasing = TRUE), ] 
+write.table(gene_scores_axis_sorted_CAUbmi_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_CAUbmi_sorted_genes.txt", quote = F, row.names = F, col.names = T, sep = '\t')
+
+gene_scores_axis_sorted_HISbmi_df <- gene_scores_axis_sorted_bmi_df[order(abs(gene_scores_axis_sorted_bmi_df[, "ancestryHIS:bmi"]), decreasing = TRUE), ] 
+write.table(gene_scores_axis_sorted_HISbmi_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_HISbmi_sorted_genes.txt", quote = F, row.names = F, col.names = T, sep = '\t')
+
+# --- distribution of gene axis scores and plotting on original triplots
+hist(gene_scores_axis_sorted_bmi_df$bmi) # gene-bmi scores normally distributed 
+hist(gene_scores_axis_sorted_bmi_df$`ancestryCAU:bmi`) # gene-bmi*cau scores normally distributed 
+hist(gene_scores_axis_sorted_bmi_df$`ancestryHIS:bmi`) # gene-bmi*his scores normally distributed 
+
+top1_perc_bmi_genes <- gene_scores_axis_sorted_bmi_df[c(1:as.integer((nrow(gene_scores_axis_sorted_bmi_df)/100)) ),]
+w_overlap_de <- which(top1_perc_bmi_genes$genes %in% de_ensembl$ensembl_gene_id)
+(length(w_overlap_de)/nrow(de_ensembl))*100 #42.857% of the previously found DE genes are in the top 1% of BMI scored genes
+
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1_top1perc_bmi.png", width = 850, height = 800)
+plot(bmi_anc_rda,
+     scaling = 1,
+     type = "none",
+     frame = FALSE,
+     xlim = c(-3,3), 
+     ylim = c(-3,3),
+     xlab = paste0("RDA1 (", perc[1], "%)"), 
+     ylab = paste0("RDA2 (", perc[2], "%)"), 
+     cex.lab = 1.5,
+     cex.axis = 1.2
+)
+color_ind <- rgb(70/255, 130/255, 180/255, alpha = 0.5)  # steelblue with alpha
+color_gene <- rgb(242/255, 189/255, 51/255, alpha = 0.5)
+color_bmi <- "maroon"
+points(sc_ind, 
+       pch = 21,
+       col = "white",
+       bg = color_ind,
+       cex = 1)
+w_bmi <- which(rownames(sc_gene) %in% top1_perc_bmi_genes$genes)
+points(sc_gene[-c(w_de, w_twas),], 
+       pch = 22,
+       col = "white",
+       bg = color_gene, 
+       cex = 1)
+points(sc_gene[c(w_bmi),], 
+       pch = 23,
+       col = "white",
+       bg = color_bmi, 
+       cex = 1.5)
+arrows(0,0, # start them from (0,0)
+       sc_bp[,1]*40, sc_bp[,2]*40, # scale up the score values
+       col = "red", 
+       lwd = 1)
+text(x = sc_bp[c(4,5),1]*40 + 0.7,
+     y = sc_bp[c(4,5),2]*40, 
+     labels = rownames(sc_bp)[c(4,5)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(3),1]*40,
+     y = sc_bp[c(3),2]*40 - 0.2, 
+     labels = rownames(sc_bp)[c(3)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(1),1]*40 + 0.2,
+     y = sc_bp[c(1),2]*40 + 0.2, 
+     labels = rownames(sc_bp)[c(1)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(2),1]*40 + 0.5,
+     y = sc_bp[c(2),2]*40 - 0.25, 
+     labels = rownames(sc_bp)[c(2)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+legend("bottomright", legend = c("Individual", "Genes", "Top 1% BMI genes"), 
+       pch = c(21, 22, 23), pt.bg = c(color_ind, color_gene, color_bmi), col = "black")
+dev.off()
+
+top1_perc_bmiHIS_genes <- gene_scores_axis_sorted_HISbmi_df[c(1:as.integer((nrow(gene_scores_axis_sorted_HISbmi_df)/100)) ),]
+w_overlap_de <- which(top1_perc_bmiHIS_genes$genes %in% de_ensembl$ensembl_gene_id)
+(length(w_overlap_de)/nrow(de_ensembl))*100 #16.7% are differentially expressed
+
+png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1_top1perc_bmiHIS.png", width = 850, height = 800)
+plot(bmi_anc_rda,
+     scaling = 1,
+     type = "none",
+     frame = FALSE,
+     xlim = c(-3,3), 
+     ylim = c(-3,3),
+     xlab = paste0("RDA1 (", perc[1], "%)"), 
+     ylab = paste0("RDA2 (", perc[2], "%)"), 
+     cex.lab = 1.5,
+     cex.axis = 1.2
+)
+color_ind <- rgb(70/255, 130/255, 180/255, alpha = 0.5)  # steelblue with alpha
+color_gene <- rgb(242/255, 189/255, 51/255, alpha = 0.5)
+color_bmi <- "maroon"
+points(sc_ind, 
+       pch = 21,
+       col = "white",
+       bg = color_ind,
+       cex = 1)
+w_bmi <- which(rownames(sc_gene) %in% top1_perc_bmiHIS_genes$genes)
+points(sc_gene[-c(w_de, w_twas),], 
+       pch = 22,
+       col = "white",
+       bg = color_gene, 
+       cex = 1)
+points(sc_gene[c(w_bmi),], 
+       pch = 23,
+       col = "white",
+       bg = color_bmi, 
+       cex = 1.5)
+arrows(0,0, # start them from (0,0)
+       sc_bp[,1]*40, sc_bp[,2]*40, # scale up the score values
+       col = "red", 
+       lwd = 1)
+text(x = sc_bp[c(4,5),1]*40 + 0.7,
+     y = sc_bp[c(4,5),2]*40, 
+     labels = rownames(sc_bp)[c(4,5)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(3),1]*40,
+     y = sc_bp[c(3),2]*40 - 0.2, 
+     labels = rownames(sc_bp)[c(3)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(1),1]*40 + 0.2,
+     y = sc_bp[c(1),2]*40 + 0.2, 
+     labels = rownames(sc_bp)[c(1)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+text(x = sc_bp[c(2),1]*40 + 0.5,
+     y = sc_bp[c(2),2]*40 - 0.25, 
+     labels = rownames(sc_bp)[c(2)], 
+     col = "red", 
+     cex = 1.2, 
+     font = 2)
+legend("bottomright", legend = c("Individual", "Genes", "Top 1% BMI:HIS genes"), 
+       pch = c(21, 22, 23), pt.bg = c(color_ind, color_gene, color_bmi), col = "black")
+dev.off()
+
+# --- cor and overlap of BMI scores and BMI:HIS scores
+
+cor.test(gene_scores_axis_sorted_bmi_df$bmi, gene_scores_axis_sorted_bmi_df$`ancestryHIS:bmi`)$p.val
+  # p < 1e-200, r = 0.5167016
+ggplot(gene_scores_axis_sorted_bmi_df, aes(x = bmi, y = `ancestryHIS:bmi`)) +
+  geom_point() +  # Add points
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
+  geom_smooth(method = "lm", color = "blue", se = FALSE) + 
+  labs(x = "Gene Scores on BMI axis", y = "Gene Scores on BMI:HIS axis") + 
+  theme_bw() +
+  theme_classic(base_size = 16)
+ggsave(filename = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/bmi_bmiHIS_cor.png", width = 5, height = 5)
+
+top1_perc_bmiHIS_genes
+top1_perc_bmi_genes
 
 # --- BMI vs ancestry
 boxplot(bmi ~ ancestry, type = "n") # seems to be some difference in bmi across ancestries
 bmi_anc <- lm(bmi ~ ancestry)
 bmi_anc_anova <- anova(bmi_anc)
 bmi_anc_lm <- summary(bmi_anc)
-
+df_plot <- as.data.frame(cbind(ancestry, as.numeric(bmi)))
+ggplot(df_plot, aes(x = ancestry, y = bmi, fill = ancestry)) + 
+  geom_boxplot() +
+  labs(x = "Ancestry", y = "BMI") +
+  theme_bw() +
+  theme_classic(base_size = 16)
+ggsave(filename = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/BMI_anc.png", width = 6, height = 6)
 

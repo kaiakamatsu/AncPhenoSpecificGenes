@@ -1,0 +1,41 @@
+---ANOVA on bmi ~ ancestry
+
+Analysis of Variance Table
+
+Response: bmi
+            Df  Sum Sq Mean Sq F value    Pr(>F)    
+ancestry     2   41.37 20.6853  21.447 7.266e-10 ***
+Residuals 1108 1068.63  0.9645                      
+
+---lm() on bmi ~ ancestry
+
+Call:
+lm(formula = bmi ~ ancestry)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-3.15338 -0.64558  0.01692  0.61494  2.88326 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.32166    0.06793   4.735 2.47e-06 ***
+ancestryCAU -0.49702    0.07968  -6.237 6.31e-10 ***
+ancestryHIS -0.23417    0.08604  -2.722   0.0066 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.9821 on 1108 degrees of freedom
+Multiple R-squared:  0.03727,	Adjusted R-squared:  0.03553 
+F-statistic: 21.45 on 2 and 1108 DF,  p-value: 7.266e-10
+
+--- Gene axis scores 
+BMI analysis:
+43% of previously found differentially expressed genes are found in top 1% of BMI axis score genes
+
+--- Cor of BMI and BMI:HIS scores 
+p < 1e-200, r = 0.5167016
+
+
+
+
+
