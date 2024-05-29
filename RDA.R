@@ -433,7 +433,7 @@ dev.off()
 gene_scores <- bmi_anc_rda$CCA$v
 axis_loadings <- bmi_anc_rda$CCA$biplot
 
-# --- can we quantify the gene's scores on each of the original axis? 
+# --- can we quantify the gene's scores on each of the original axis?
 # gene_score_axis1 = gene_score_RDA1 * axis1_loading_RDA1 + gene_score_RDA2 * axis1_loading_RDA2
 # (genes x RDA) %*% (RDA x axis)
 
@@ -455,12 +455,42 @@ write.table(gene_scores_axis_sorted_CAUbmi_df, file = "C:/Users/kaiak/OneDrive/D
 gene_scores_axis_sorted_HISbmi_df <- gene_scores_axis_sorted_bmi_df[order(abs(gene_scores_axis_sorted_bmi_df[, "ancestryHIS:bmi"]), decreasing = TRUE), ] 
 write.table(gene_scores_axis_sorted_HISbmi_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_HISbmi_sorted_genes.txt", quote = F, row.names = F, col.names = T, sep = '\t')
 
+# --- based on RDA1, can we quantify the gene's scores on each of the original axis?
+# RDA1 only
+# (genes x RDA1) %*% (RDA1 x axis)
+
+gene_scores_axis_rda1 <- as.matrix(gene_scores[,1]) %*% axis_loadings_t[1,]
+colnames(gene_scores_axis_rda1) <- colnames(axis_loadings_t)
+
+# --- using all RDA for gene-bmi scores results in pretty different scores
+rda1_df <- gene_scores_axis_sorted_bmi_rda1_df[,c(1,4)]
+rdaall_df <- gene_scores_axis_sorted_bmi_df[,c(1,4)]
+merged <- merge(rda1_df, rdaall_df, by = "genes")
+cor(merged$bmi.x, merged$bmi.y) # 0.0765428
+
+# --- order based on these gene axis score computed from RDA 1
+
+gene_scores_axis_sorted_bmi_rda1 <- gene_scores_axis_rda1[order(abs(gene_scores_axis_rda1[, "bmi"]), decreasing = TRUE), ] # sort based on absolute value of gene bmi score
+genes <- rownames(gene_scores_axis_sorted_bmi_rda1)
+gene_scores_axis_sorted_bmi_rda1_df <- as.data.frame(gene_scores_axis_sorted_bmi_rda1)
+gene_scores_axis_sorted_bmi_rda1_df <- cbind(genes, gene_scores_axis_sorted_bmi_rda1_df)
+rownames(gene_scores_axis_sorted_bmi_rda1_df) <- NULL
+write.table(gene_scores_axis_sorted_bmi_rda1_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_bmi_sorted_genes_rda1.txt", quote = F, row.names = F, col.names = T, sep = '\t')
+
+gene_scores_axis_sorted_CAUbmi_rda1_df <- gene_scores_axis_sorted_bmi_rda1_df[order(abs(gene_scores_axis_sorted_bmi_rda1_df[, "ancestryCAU:bmi"]), decreasing = TRUE), ] 
+write.table(gene_scores_axis_sorted_CAUbmi_rda1_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_CAUbmi_sorted_genes_rda1.txt", quote = F, row.names = F, col.names = T, sep = '\t')
+
+gene_scores_axis_sorted_HISbmi_rda1_df <- gene_scores_axis_sorted_bmi_rda1_df[order(abs(gene_scores_axis_sorted_bmi_rda1_df[, "ancestryHIS:bmi"]), decreasing = TRUE), ] 
+write.table(gene_scores_axis_sorted_HISbmi_rda1_df, file = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/rda_HISbmi_sorted_genes_rda1.txt", quote = F, row.names = F, col.names = T, sep = '\t')
+
 # --- distribution of gene axis scores and plotting on original triplots
 hist(gene_scores_axis_sorted_bmi_df$bmi) # gene-bmi scores normally distributed 
 hist(gene_scores_axis_sorted_bmi_df$`ancestryCAU:bmi`) # gene-bmi*cau scores normally distributed 
 hist(gene_scores_axis_sorted_bmi_df$`ancestryHIS:bmi`) # gene-bmi*his scores normally distributed 
 
 top1_perc_bmi_genes <- gene_scores_axis_sorted_bmi_df[c(1:as.integer((nrow(gene_scores_axis_sorted_bmi_df)/100)) ),]
+top10_perc_bmi_genes <- gene_scores_axis_sorted_bmi_df[c(1:as.integer((nrow(gene_scores_axis_sorted_bmi_df)/10)) ),]
+
 w_overlap_de <- which(top1_perc_bmi_genes$genes %in% de_ensembl$ensembl_gene_id)
 (length(w_overlap_de)/nrow(de_ensembl))*100 #42.857% of the previously found DE genes are in the top 1% of BMI scored genes
 
@@ -530,6 +560,10 @@ dev.off()
 top1_perc_bmiHIS_genes <- gene_scores_axis_sorted_HISbmi_df[c(1:as.integer((nrow(gene_scores_axis_sorted_HISbmi_df)/100)) ),]
 w_overlap_de <- which(top1_perc_bmiHIS_genes$genes %in% de_ensembl$ensembl_gene_id)
 (length(w_overlap_de)/nrow(de_ensembl))*100 #16.7% are differentially expressed
+
+top1_perc_bmiCAU_genes <- gene_scores_axis_sorted_CAUbmi_df[c(1:as.integer((nrow(gene_scores_axis_sorted_CAUbmi_df)/100)) ),]
+w_overlap_de <- which(top1_perc_bmiCAU_genes$genes %in% de_ensembl$ensembl_gene_id)
+(length(w_overlap_de)/nrow(de_ensembl))*100 #16.7%
 
 png(filename="C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/RDA_custom_scale1_top1perc_bmiHIS.png", width = 850, height = 800)
 plot(bmi_anc_rda,
@@ -607,8 +641,75 @@ ggplot(gene_scores_axis_sorted_bmi_df, aes(x = bmi, y = `ancestryHIS:bmi`)) +
   theme_classic(base_size = 16)
 ggsave(filename = "C:/Users/kaiak/OneDrive/Documents/BGGN273/final_project/AncPhenoSpecificGenes/bmi_bmiHIS_cor.png", width = 5, height = 5)
 
-top1_perc_bmiHIS_genes
-top1_perc_bmi_genes
+
+intersection <- length(which(top1_perc_bmi_genes$genes %in% top1_perc_bmiHIS_genes$genes)) #61 genes in common
+specific <- nrow(top1_perc_bmi_genes) - intersection #163 unique to each group
+
+# --- top 1 percent of bmi genes
+w_cols_bmi <- which(colnames(ge_residuals) %in% top1_perc_bmi_genes$genes)
+#w_cols_bmi <- which(colnames(ge_residuals) %in% top10_perc_bmi_genes$genes)
+ge_top1_perc_bmi <- as.data.frame(ge_residuals)[,w_cols_bmi]
+
+bmi_effects <- function(ge_values, bmi_values){
+  model <- lm(ge_values ~ bmi_values)
+  model_summary <- summary(model)
+  data <- model_summary$coefficients[2,c(1,2,4)]
+  return(data)
+}
+
+genes <- c()
+B <- c()
+SE <- c()
+p <- c()
+for(i in 1:ncol(ge_top1_perc_bmi)){
+  genes <- append(genes, colnames(ge_top1_perc_bmi)[i])
+  datas <- bmi_effects(ge_top1_perc_bmi[,i], bmi)
+  B <- append(B, datas[1])
+  SE <- append(SE, datas[2])
+  p <- append(p, datas[3])
+}
+summary_stats <- data.frame(genes, B, SE, p)
+summary_stats_sig <- filter(summary_stats, p < (0.05/nrow(gene_scores_axis_sorted_bmi_df)))
+nrow(summary_stats_sig) # 142 hits, bonferroni 
+
+# --- top 1 percent of bmi:his genes 
+w_cols_bmi_his <- which(colnames(ge_residuals) %in% top1_perc_bmiHIS_genes$genes)
+ge_top1_perc_bmi_his <- as.data.frame(ge_residuals)[,w_cols_bmi_his]
+
+bmi_anc_interaction_effects <- function(ge_values, bmi_values, ancestry_groups, col){
+  model <- lm(ge_values ~ bmi_values*ancestry_groups)
+  model_summary <- summary(model)
+  data <- model_summary$coefficients[col,c(4)]
+  return(data)
+}
+
+genes <- c()
+p_HIS <- c()
+for(i in 1:ncol(ge_top1_perc_bmi_his)){
+  genes <- append(genes, colnames(ge_top1_perc_bmi_his)[i])
+  datas <- bmi_anc_interaction_effects(ge_top1_perc_bmi_his[,i], bmi, ancestry, 6)
+  p_HIS <- append(p_HIS, datas)
+}
+summary_stats_bmianc <- data.frame(genes, p_HIS)
+summary_stats_bmiHIS_sig <- filter(summary_stats_bmianc, p_HIS < (0.05/nrow(summary_stats_bmianc)))
+nrow(summary_stats_bmiHIS_sig) # 5 genes with a very significant BMI:HIS coefficient 
+
+
+# --- top 1 percent of bmi:cau genes 
+w_cols_bmi_cau <- which(colnames(ge_residuals) %in% top1_perc_bmiCAU_genes$genes)
+ge_top1_perc_bmi_cau <- as.data.frame(ge_residuals)[,w_cols_bmi_cau]
+
+genes <- c()
+p_CAU <- c()
+for(i in 1:ncol(ge_top1_perc_bmi_his)){
+  genes <- append(genes, colnames(ge_top1_perc_bmi_cau)[i])
+  datas <- bmi_anc_interaction_effects(ge_top1_perc_bmi_cau[,i], bmi, ancestry, 5)
+  p_CAU <- append(p_CAU, datas)
+}
+summary_stats_bmicau <- data.frame(genes, p_CAU)
+summary_stats_bmiCAU_sig <- filter(summary_stats_bmicau, p_HIS < (0.05/nrow(summary_stats_bmicau)))
+nrow(summary_stats_bmiCAU_sig) # 5 genes with very significant BMI:CAU coefficient
+
 
 # --- BMI vs ancestry
 boxplot(bmi ~ ancestry, type = "n") # seems to be some difference in bmi across ancestries

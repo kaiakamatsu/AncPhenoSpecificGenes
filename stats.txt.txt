@@ -35,7 +35,11 @@ BMI analysis:
 --- Cor of BMI and BMI:HIS scores 
 p < 1e-200, r = 0.5167016
 
+--- BMI vs BMI:HIS
+61 genes overlap and 163 genes unique to each group in top 1% of genes
 
-
+--- interactions 
+5 genes with a significantly different slope for expression ~ bmi for HIS
+5 genes with a significantly different slope for expression ~ bmi for CAU
 
 
