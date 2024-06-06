@@ -28,18 +28,80 @@ Residual standard error: 0.9821 on 1108 degrees of freedom
 Multiple R-squared:  0.03727,	Adjusted R-squared:  0.03553 
 F-statistic: 21.45 on 2 and 1108 DF,  p-value: 7.266e-10
 
---- Gene axis scores 
-BMI analysis:
-43% of previously found differentially expressed genes are found in top 1% of BMI axis score genes
+--- RDA on bmi*anc
+# 999 permutations
+#Model 1: ge_residuals ~ 1
+#Model 2: ge_residuals ~ ancestry * bmi
+#   ResDf ResChiSquare Df ChiSquare     F Pr(>F)    
+#1  1110        22475                               
+#2  1105        22168  5    307.37 3.0644  0.001
 
---- Cor of BMI and BMI:HIS scores 
-p < 1e-200, r = 0.5167016
 
---- BMI vs BMI:HIS
-61 genes overlap and 163 genes unique to each group in top 1% of genes
+--- BMI axis scores, no interaction
+19% of previously found differentially expressed genes are found in top 1% of BMI axis score genes (8/42)
 
---- interactions 
-5 genes with a significantly different slope for expression ~ bmi for HIS
-5 genes with a significantly different slope for expression ~ bmi for CAU
+lm():
+144/224 top 1 % pass Bonferroni (0.05/22475)
+193/224 top 1 % pass Bonferroni lenient (0.05/224*3RDA )
+
+one with strongest association is plotted 
+ENSG00000025039, p = 1.234555e-18
+Adjusted R-squared:  0.1032, p < 2.2e-16
+plays a crucial role in the cellular response to amino acid availability through regulation of the mTORC1 signaling cascade (https://www.genecards.org/cgi-bin/carddisp.pl?gene=RRAGD)
+
+previous gene-level associations (through genetic data) found with weight, bmi, type 2 diabetes (Dornbos et al. 2022 Cell Metabolism)
+causative experimentally for kidney disease (Schlingmann et al. 2021 J Am Soc Nephrol)
+kidney diseases linked to bmi (Herrington et al. 2017 PLoS One)
+
+--- BMI:anc scores, with interaction scaled by eigen values
+30% of previously found differentially expressed genes are found in top 1% of BMI:HIS axis score genes (13/42)
+21% of previously found differentially expressed genes are found in top 1% of BMI:CAU axis score genes (9/42)
+
+lm():
+bmi:HIS 0 association (0.05/224*5RDA)
+bmi:CAU 0 association (0.05/224*5RDA)
+
+--- BMI:anc scores, with interaction NOT scaled by eigen values
+17% of previously found differentially expressed genes are found in top 1% of BMI:HIS axis score genes (7/42)
+17% of previously found differentially expressed genes are found in top 1% of BMI:CAU axis score genes (7/42)
+
+lm():
+bmi:HIS 1 association (0.05/224*5RDA)
+bmi:CAU 1 association (0.05/224*5RDA)
+
+bmi:CAU significant gene: ENSG00000145348 (TBCK)
+This gene encodes a protein that contains a protein kinase domain, a Rhodanase-like domain and the Tre-2/Bub2/Cdc16 (TBC) domain. The encoded protein is thought to play a role in actin organization, cell growth and cell proliferation by regulating the mammalian target of the rapamycin (mTOR) signaling pathway (gene cards). 
+GWAS associations near this gene for alcohol consumption (Kranzler et al 2019 Nature Communications)
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      0.040296   0.071542   0.563 0.573380    
+bmi             -0.210294   0.065929  -3.190 0.001464 ** 
+ancestryCAU      0.008587   0.083232   0.103 0.917850    
+ancestryHIS     -0.057293   0.089240  -0.642 0.521001    
+bmi:ancestryCAU  0.397412   0.078212   5.081  4.4e-07 ***
+bmi:ancestryHIS  0.298217   0.087612   3.404 0.000688 ***
+
+split ancestries 
+
+	AA
+	Adjusted R-squared:  0.04298, p-value: 0.001509
+
+	HIS 
+	Adjusted R-squared:  0.005176, p-value: 0.09547
+
+	CAU 
+	Adjusted R-squared:  0.02938, p-value: 2.871e-05
+
+
+--- Cor of BMI and BMI:HIS scores in interaction analysis
+p < 1e-200, r = 0.8441867
+
+--- Cor of BMI and BMI:CAU scores in interaction analysis
+p < 1e-200, r = 0.9390707
+
+--- BMI vs BMI:HIS in interaction analysis
+126 genes overlap and 98 genes unique to each group in top 1% of genes
+
 
 

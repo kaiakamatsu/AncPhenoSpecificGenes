@@ -39,17 +39,24 @@ I regress out several confounders/covariates from the gene expression data befor
 
 > ANOVA
 
-### Which genes are differentially expressed in individuals with differenet BMI? Which genes are differentially expressed in different BMI groups of different ancestries?
+### Which genes are differentially expressed in individuals with differenet BMI?
 
-> Redundancy analysis
+> Redundancy analysis without BMI/ancestry interaction
+
+### Which genes are differentially expressed in different BMI groups of different ancestries?
+
+> Redundancy analysis with BMI/ancestry interaction
 
 ### What are the functions of these genes?
 
 ### Interesting Findings
 
-1. ENSG00000135842, NIBAN
+1. RRAGD, ENSG00000025039 (p = 1.234555e-18, BMI associated)
 
-> regulates adipocyte apoptosis, important in obesity development (https://pubmed.ncbi.nlm.nih.gov/33185830/)
+> - plays a crucial role in the cellular response to amino acid availability through regulation of the mTORC1 signaling cascade (genecards)
+> - previous gene-level associations (through genetic data) found with weight, bmi, type 2 diabetes (Dornbos et al. 2022 Cell Metabolism)
+> - causative experimentally for kidney disease (Schlingmann et al. 2021 J Am Soc Nephrol)
+> - kidney diseases linked to bmi (Herrington et al. 2017 PLoS One)
 
 ### Comparison to previous association studies
 
