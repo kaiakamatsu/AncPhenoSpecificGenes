@@ -2,6 +2,8 @@
 
 Final Project for BGGN 273, Biostatistics
 
+see BGGN273.pdf for 1 slide summary
+
 ## Dependencies
 
 R packages
